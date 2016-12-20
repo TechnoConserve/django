@@ -8,6 +8,11 @@ from django.utils._os import upath
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 
+try:
+    from django.template.backends.jinja2 import Jinja2
+except ImportError:
+    Jinja2 = None
+
 ROOT = upath(os.path.dirname(__file__))
 
 
@@ -30,21 +35,23 @@ class EngineRendererMixin(object):
     def get_template(self, template_name):
         return self.engine.get_template(template_name)
 
+    @cached_property
+    def engine(self):
+        return self.backend({
+            'APP_DIRS': True,
+            'DIRS': [],
+            'POST_APP_DIRS': [os.path.join(ROOT, self.backend.app_dirname)],
+            'NAME': 'djangoforms',
+            'OPTIONS': {},
+        })
+
 
 class DjangoTemplateRenderer(EngineRendererMixin, BaseTemplateRenderer):
     """
     Load Django templates from app directories and the built-in widget
     templates in django/forms/templates.
     """
-    @cached_property
-    def engine(self):
-        return DjangoTemplates({
-            'APP_DIRS': True,
-            'DIRS': [],
-            'POST_APP_DIRS': [os.path.join(ROOT, 'templates')],
-            'NAME': 'djangoforms',
-            'OPTIONS': {},
-        })
+    backend = DjangoTemplates
 
 
 class Jinja2TemplateRenderer(EngineRendererMixin, BaseTemplateRenderer):
@@ -52,16 +59,7 @@ class Jinja2TemplateRenderer(EngineRendererMixin, BaseTemplateRenderer):
     Load Jinja2 templates from app directories and the built-in widget
     templates in django/forms/jinja2.
     """
-    @cached_property
-    def engine(self):
-        from django.template.backends.jinja2 import Jinja2
-        return Jinja2({
-            'APP_DIRS': True,
-            'DIRS': [],
-            'POST_APP_DIRS': [os.path.join(ROOT, 'jinja2')],
-            'NAME': 'djangoforms',
-            'OPTIONS': {},
-        })
+    backend = Jinja2
 
 
 class ProjectTemplateRenderer(BaseTemplateRenderer):
