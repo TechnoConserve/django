@@ -1,4 +1,5 @@
 import os
+import unittest
 
 from django.forms.renderers import (
     BaseTemplateRenderer, DjangoTemplateRenderer, Jinja2TemplateRenderer,
@@ -7,6 +8,11 @@ from django.forms.renderers import (
 from django.forms.widgets import Input
 from django.test import SimpleTestCase, modify_settings
 from django.utils._os import upath
+
+try:
+    import jinja2
+except ImportError:
+    jinja2 = None
 
 
 class SharedTests(object):
@@ -51,6 +57,7 @@ class DjangoTemplateRendererTests(SharedTests, SimpleTestCase):
     renderer = DjangoTemplateRenderer
 
 
+@unittest.skipIf(jinja2 is None, 'jinja2 required')
 class Jinja2TemplateRendererTests(SharedTests, SimpleTestCase):
     renderer = Jinja2TemplateRenderer
     expected_widget_dir = 'jinja2'
