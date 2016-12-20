@@ -39,8 +39,7 @@ class EngineRendererMixin(object):
     def engine(self):
         return self.backend({
             'APP_DIRS': True,
-            'DIRS': [],
-            'POST_APP_DIRS': [os.path.join(ROOT, self.backend.app_dirname)],
+            'DIRS': [os.path.join(ROOT, self.backend.app_dirname)],
             'NAME': 'djangoforms',
             'OPTIONS': {},
         })
@@ -48,16 +47,16 @@ class EngineRendererMixin(object):
 
 class DjangoTemplateRenderer(EngineRendererMixin, BaseTemplateRenderer):
     """
-    Load Django templates from app directories and the built-in widget
-    templates in django/forms/templates.
+    Load Django templates from the built-in widget templates in
+    django/forms/templates and from app directories.
     """
     backend = DjangoTemplates
 
 
 class Jinja2TemplateRenderer(EngineRendererMixin, BaseTemplateRenderer):
     """
-    Load Jinja2 templates from app directories and the built-in widget
-    templates in django/forms/jinja2.
+    Load Jinja2 templates from the built-in widget templates in
+    django/forms/jinja2 and form app directories.
     """
     backend = Jinja2
 
